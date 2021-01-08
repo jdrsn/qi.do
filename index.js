@@ -8,7 +8,6 @@ module.exports = class qido {
 
     constructor(app, key = null) {
         this.baseUrl = 'https://qi.do'
-        // this.baseUrl = 'http://localhost:3007'
         this.socketUrl = 'https://s.qi.do'
         this.app = app
         this.key = key
@@ -87,7 +86,7 @@ module.exports = class qido {
         })
     }
 
-    subscribe(subscription, token = null) {
+    subs(subscription, token = null) {
         let url = '/p/' + this.app + '/s?x=' + JSON.stringify(subscription)
         let options = {
             method: 'POST',
