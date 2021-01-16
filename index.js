@@ -3,7 +3,7 @@ const rxjs = require('rxjs')
 const io = require('socket.io-client')
 
 let headers = {'Content-Type': 'application/json'}
-let isServer = typeof module !== 'undefined'
+let isServer = typeof window === 'undefined'
 
 module.exports = class qido {
 
@@ -33,7 +33,7 @@ module.exports = class qido {
     }
 
     auth(login, pass = null) {
-        let body = JSON.stringify(login)
+        let body = JSON.stringify({u: login, p: pass})
         if (!isServer) {
             if (login instanceof FormData) {
                 body = login
