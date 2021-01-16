@@ -3,6 +3,7 @@ const rxjs = require('rxjs')
 const io = require('socket.io-client')
 
 let headers = {'Content-Type': 'application/json'}
+let isServer = typeof module !== 'undefined'
 
 module.exports = class qido {
 
@@ -16,7 +17,8 @@ module.exports = class qido {
     }
 
     getToken() {
-        return this.token || localStorage.getItem('token') || sessionStorage.getItem('token')
+        if (isServer) return this.token
+        else return this.token || localStorage.getItem('token') || sessionStorage.getItem('token')
     }
 
     request(endpoint = '', options = {}, token = null) {
@@ -31,22 +33,32 @@ module.exports = class qido {
     }
 
     auth(login, pass = null) {
-        if (login instanceof FormData) headers = {}
-        else login = JSON.stringify({u: login, p: pass})
+        let body = JSON.stringify(login)
+        if (!isServer) {
+            if (login instanceof FormData) {
+                body = login
+                headers = {}
+            }
+        }
         const options = {
             method: 'POST',
-            body: login,
+            body: body,
             headers: headers
         }
         return this.request('/a/' + this.app, options)
     }
 
     create(path, object, token = null) {
-        if (object instanceof FormData) headers = {}
-        else object = JSON.stringify(object)
+        let body = JSON.stringify(object)
+        if (!isServer) {
+            if (object instanceof FormData) {
+                body = object
+                headers = {}
+            }
+        }
         const options = {
             method: 'POST',
-            body: object,
+            body: body,
             headers: headers
         }
         return this.request('/c/' + this.app + '/' + path, options, token)
@@ -58,11 +70,16 @@ module.exports = class qido {
     }
 
     update(path, props, token = null) {
-        if (props instanceof FormData) headers = {}
-        else props = JSON.stringify(props)
+        let body = JSON.stringify(props)
+        if (!isServer) {
+            if (props instanceof FormData) {
+                body = props
+                headers = {}
+            }
+        }
         const options = {
             method: 'PUT',
-            body: props,
+            body: body,
             headers: headers
         }
         return this.request('/u/' + this.app + '/' + path, options, token)
