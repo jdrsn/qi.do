@@ -1,11 +1,12 @@
 const fetch = require('node-fetch')
 const rxjs = require('rxjs')
 const io = require('socket.io-client')
+const FormData = require('form-data')
 
 let headers = {'Content-Type': 'application/json'}
 let isServer = typeof window === 'undefined'
 
-module.exports = class qido {
+class qido {
 
     constructor(app, key = null) {
         this.baseUrl = 'https://qi.do'
@@ -33,32 +34,22 @@ module.exports = class qido {
     }
 
     auth(login, pass = null) {
-        let body = JSON.stringify({u: login, p: pass})
-        if (!isServer) {
-            if (login instanceof FormData) {
-                body = login
-                headers = {}
-            }
-        }
+        if (login instanceof FormData) headers = {}
+        else login = JSON.stringify({u: login, p: pass})
         const options = {
             method: 'POST',
-            body: body,
+            body: login,
             headers: headers
         }
         return this.request('/a/' + this.app, options)
     }
 
-    create(path, object, token = null) {
-        let body = JSON.stringify(object)
-        if (!isServer) {
-            if (object instanceof FormData) {
-                body = object
-                headers = {}
-            }
-        }
+    create(path, object, fileSize, token = null) {
+        if (object instanceof FormData) headers = {}
+        else object = JSON.stringify(object)
         const options = {
             method: 'POST',
-            body: body,
+            body: object,
             headers: headers
         }
         return this.request('/c/' + this.app + '/' + path, options, token)
@@ -70,16 +61,11 @@ module.exports = class qido {
     }
 
     update(path, props, token = null) {
-        let body = JSON.stringify(props)
-        if (!isServer) {
-            if (props instanceof FormData) {
-                body = props
-                headers = {}
-            }
-        }
+        if (props instanceof FormData) headers = {}
+        else props = JSON.stringify(props)
         const options = {
             method: 'PUT',
-            body: body,
+            body: props,
             headers: headers
         }
         return this.request('/u/' + this.app + '/' + path, options, token)
@@ -136,3 +122,5 @@ module.exports = class qido {
         return this.request(url, options, token)
     }
 }
+
+module.exports = (app, key = null) => { return new qido(app, key) }
